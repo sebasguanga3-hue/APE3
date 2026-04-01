@@ -1,0 +1,108 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <iomanip>
+#include <algorithm>
+
+using namespace std;
+
+int main() {
+    char continuar;
+
+    do {
+        int N;
+        do {
+            cout << "Ingrese la cantidad de estudiantes: ";
+            cin >> N;
+        } while (N <= 0);
+
+        int contA = 0, contB = 0;
+        int excelente = 0, muyBueno = 0, bueno = 0, enRiesgo = 0, reprobadoNota = 0, reprobadoAsis = 0;
+        int estables = 0, inestables = 0;
+        double sumaTotalPromedios = 0;
+        double sumaPromA = 0, sumaPromB = 0;
+
+        double maxProm = -1, minProm = 11;
+        string nombreMax, nombreMin;
+
+        for (int i = 0; i < N; i++) {
+            string nombre;
+            char paralelo;
+            double n1, n2, np, asistencia;
+
+            cout << "\n--- Estudiante " << i + 1 << " ---" << endl;
+            cout << "Nombre: ";
+            cin.ignore();
+            getline(cin, nombre);
+
+            do {
+                cout << "Paralelo: ";
+                cin >> paralelo;
+                paralelo = toupper(paralelo);
+            } while (paralelo != 'A' && paralelo != 'B');
+
+            auto validarNota = [](string msg) {
+                double nota;
+                do {
+                    cout << msg;
+                    cin >> nota;
+                } while (nota < 0 || nota > 10);
+                return nota;
+            };
+
+            n1 = validarNota("Nota Primer Parcial: ");
+            n2 = validarNota("Nota Segundo Parcial: ");
+            np = validarNota("Nota Practicas: ");
+
+            do {
+                cout << "Porcentaje Asistencia: ";
+                cin >> asistencia;
+            } while (asistencia < 0 || asistencia > 100);
+
+            double promedio = (n1 * 0.30) + (n2 * 0.30) + (np * 0.40);
+            sumaTotalPromedios += promedio;
+
+            if (promedio >= 9 && asistencia < 80)
+                cout << "[ALERTA]." << endl;
+
+            if (n1 == n2 && n2 == np) estables++;
+
+            double notaMax = max({n1, n2, np});
+            double notaMin = min({n1, n2, np});
+            if ((notaMax - notaMin) > 4) inestables++;
+
+            if (asistencia < 70) {
+                reprobadoAsis++;
+            } else {
+                if (promedio >= 9) excelente++;
+                else if (promedio >= 8) muyBueno++;
+                else if (promedio >= 7) bueno++;
+                else if (promedio >= 6) enRiesgo++;
+                else reprobadoNota++;
+            }
+
+            if (paralelo == 'A') { contA++; sumaPromA += promedio; }
+            else { contB++; sumaPromB += promedio; }
+
+            if (promedio > maxProm) { maxProm = promedio; nombreMax = nombre; }
+            if (promedio < minProm) { minProm = promedio; nombreMin = nombre; }
+        }
+
+        cout << "\n================ REPORTE FINAL ================" << endl;
+        cout << "Total estudiantes: " << N << endl;
+        cout << "Estudiantes: Paralelo A: " << contA << " | Paralelo B: " << contB << endl;
+        cout << "Promedio General: " << fixed << setprecision(2) << (sumaTotalPromedios / N) << endl;
+
+        if(contA > 0) cout << "Promedio Paralelo A: " << (sumaPromA / contA) << endl;
+        if(contB > 0) cout << "Promedio Paralelo B: " << (sumaPromB / contB) << endl;
+
+        cout << "Mejor estudiante: " << nombreMax << " con " << maxProm << endl;
+        cout << "Porcentaje Aprobados: " << (double)(excelente + muyBueno + bueno + enRiesgo) / N * 100 << "%" << endl;
+
+        cout << "\nDesea repetir para otro curso (S/N): ";
+        cin >> continuar;
+
+    } while (toupper(continuar) == 'S');
+
+    return 0;
+}
